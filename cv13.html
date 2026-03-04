@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alvin Varghese George — Cybersecurity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --red: #ff1f1f;
+            --red-dim: #cc1919;
+            --grey-dark: #0a0a0a;
+            --grey-mid: #1a1a1a;
+            --grey-light: #2a2a2a;
+            --grey-text: #888888;
+            --dot: rgba(255,255,255,0.06);
+            --yautja: #ff4400;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .cursor {
+            width: 8px; height: 8px;
+            background: var(--red);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+        .cursor-ring {
+            width: 28px; height: 28px;
+            border: 1px solid rgba(255,31,31,0.5);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none; z-index: 0;
+        }
+
+        #loader {
+            position: fixed; inset: 0;
+            background: var(--black);
+            z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 2rem;
+            animation: loaderOut 0.6s ease-out 3s forwards;
+        }
+        @keyframes loaderOut { to { opacity: 0; visibility: hidden; } }
+        .loader-logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900; font-size: 3rem;
+            letter-spacing: 0.5rem; text-transform: uppercase;
+            color: var(--white);
+        }
+        .loader-logo span { color: var(--red); }
+        .loader-bar-wrap {
+            width: 200px; height: 2px;
+            background: var(--grey-mid); position: relative; overflow: hidden;
+        }
+        .loader-bar {
+            height: 100%; background: var(--red);
+            animation: loaderBar 2.5s ease-out forwards; width: 0;
+        }
+        @keyframes loaderBar { to { width: 100%; } }
+        .loader-text {
+            font-family: 'Space Mono', monospace; font-size: 0.65rem;
+            color: var(--grey-text); letter-spacing: 0.15rem; text-transform: uppercase;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .glyph-strip {
+            position: fixed; top: 0; bottom: 0; width: 48px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 6px;
+            z-index: 50; pointer-events: none; overflow: hidden;
+        }
+        .glyph-strip.left { left: 0; border-right: 1px solid var(--grey-light); }
+        .glyph-strip.right { right: 0; border-left: 1px solid var(--grey-light); }
+        .glyph-char {
+            font-family: 'Space Mono', monospace; font-size: 10px;
+            color: var(--grey-text); opacity: 0;
+            animation: glyphFade 3s linear infinite;
+            writing-mode: vertical-rl; letter-spacing: 3px;
+        }
+        @keyframes glyphFade { 0%,100%{opacity:0;} 30%,70%{opacity:0.4;} }
+
+        #main-wrap {
+            margin: 0 48px; position: relative; z-index: 1;
+            opacity: 0; animation: mainIn 0.8s ease-out 3.4s forwards;
+        }
+        @keyframes mainIn { to { opacity: 1; } }
+
+        header {
+            padding: 4rem 3rem 3rem; border-bottom: 1px solid var(--grey-light);
+            position: relative;
+        }
+        .header-eyebrow {
+            font-family: 'Space Mono', monospace; font-size: 0.65rem;
+            letter-spacing: 0.25rem; text-transform: uppercase;
+            color: var(--red); margin-bottom: 1.2rem;
+        }
+        header h1 {
+            font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+            font-size: clamp(3rem, 8vw, 7rem); line-height: 0.9;
+            text-transform: uppercase; letter-spacing: -0.02em;
+            color: var(--white); margin-bottom: 1.5rem;
+        }
+        header h1 .line2 {
+            color: transparent; -webkit-text-stroke: 1px var(--white);
+        }
+        .header-meta {
+            display: flex; gap: 2.5rem; flex-wrap: wrap;
+        }
+        .header-meta-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem; color: var(--grey-text);
+            font-family: 'Space Mono', monospace;
+        }
+        .header-meta-item .dot-indicator {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--red); flex-shrink: 0;
+            animation: pulse 2s ease infinite;
+        }
+        @keyframes pulse {
+            0%,100%{box-shadow:0 0 0 0 rgba(255,31,31,0.7);}
+            50%{box-shadow:0 0 0 6px rgba(255,31,31,0);}
+        }
+        .status-row {
+            display: flex; align-items: center; gap: 1.5rem;
+            margin-top: 1.5rem; flex-wrap: wrap;
+        }
+        .status-pill {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-family: 'Space Mono', monospace; font-size: 0.6rem;
+            text-transform: uppercase; letter-spacing: 0.08rem;
+            color: var(--grey-text); border: 1px solid var(--grey-light);
+            padding: 0.3rem 0.7rem; border-radius: 2px;
+        }
+        .status-pill .pip { width:5px;height:5px;border-radius:50%;background:var(--red); }
+        .status-pill.active { color: var(--white); border-color: var(--red); }
+        .corner-tl, .corner-br { position: absolute; width:12px;height:12px;pointer-events:none; }
+        .corner-tl { top:1.5rem;right:1.5rem;border-top:1px solid var(--grey-light);border-right:1px solid var(--grey-light); }
+        .corner-br { bottom:1.5rem;right:1.5rem;border-bottom:1px solid var(--grey-light);border-right:1px solid var(--grey-light); }
+
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--grey-light);
+            padding: 0 3rem; display: flex; align-items: center; gap: 0;
+        }
+        nav::before {
+            content: '//'; font-family: 'Space Mono', monospace;
+            font-size: 0.7rem; color: var(--red); margin-right: 1.5rem; opacity: 0.8;
+        }
+        nav a {
+            color: var(--grey-text); text-decoration: none; font-size: 0.7rem;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.1rem;
+            padding: 1.1rem 1rem; position: relative; transition: color 0.2s;
+            white-space: nowrap;
+        }
+        nav a::after {
+            content:''; position:absolute; bottom:0;left:0;right:0;height:2px;
+            background:var(--red);transform:scaleX(0);transition:transform 0.2s;
+        }
+        nav a:hover { color: var(--white); }
+        nav a:hover::after { transform: scaleX(1); }
+
+        section {
+            padding: 3.5rem 3rem; border-bottom: 1px solid var(--grey-light);
+            position: relative; opacity: 0; transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        section.visible { opacity:1; transform:translateY(0); }
+
+        .section-label {
+            font-family: 'Space Mono', monospace; font-size: 0.6rem;
+            letter-spacing: 0.25rem; text-transform: uppercase;
+            color: var(--red); margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.8rem;
+        }
+        .section-label::before {
+            content:''; display:inline-block; width:24px; height:1px; background:var(--red);
+        }
+
+        h2 {
+            font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+            font-size: clamp(2rem, 4vw, 3.5rem); text-transform: uppercase;
+            letter-spacing: -0.01em; color: var(--white); margin-bottom: 2rem; line-height: 1;
+            position: relative; display: inline-block;
+        }
+        h2 .yautja-layer {
+            position: absolute; top: 0; left: 0; width: 100%;
+            font-family: 'Space Mono', monospace;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            color: var(--yautja);
+            text-shadow: 0 0 12px rgba(255,68,0,0.8), 0 0 24px rgba(255,68,0,0.4);
+            opacity: 1;
+            transition: opacity 0.9s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        h2.decoded .yautja-layer { opacity: 0; }
+        h2 .real-layer {
+            opacity: 0; transition: opacity 0.9s ease 0.4s;
+            position: relative; z-index: 1;
+        }
+        h2.decoded .real-layer { opacity: 1; }
+        h2.decoding::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(255,68,0,0.15) 50%, transparent 60%);
+            animation: scanDecode 1.8s linear;
+            pointer-events: none;
+        }
+        @keyframes scanDecode {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        h3 {
+            font-family: 'Barlow', sans-serif; font-weight: 700;
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1rem;
+            color: var(--red); margin: 2rem 0 0.8rem;
+            display: flex; align-items: center; gap: 0.5rem; position: relative;
+        }
+        h3 .yautja-h3-layer {
+            position: absolute; top: 0; left: 0;
+            font-family: 'Space Mono', monospace; font-size: 0.75rem;
+            color: var(--yautja); opacity: 1;
+            text-shadow: 0 0 8px rgba(255,68,0,0.6);
+            transition: opacity 0.8s ease;
+            white-space: nowrap; pointer-events: none;
+        }
+        h3 .real-h3-layer { opacity: 0; transition: opacity 0.8s ease 0.3s; }
+        h3::before {
+            content: ''; width:12px;height:12px; border:1.5px solid var(--red);
+            border-radius:2px; display:inline-block; flex-shrink:0;
+            opacity: 0; transition: opacity 0.6s ease 0.6s;
+        }
+        h3.decoded::before { opacity: 1; }
+        h3.decoded .yautja-h3-layer { opacity: 0; }
+        h3.decoded .real-h3-layer { opacity: 1; display: flex; align-items: center; gap: 0.5rem; }
+
+        p { color:#b0b0b0; font-size:0.95rem; line-height:1.7; margin-bottom:0.8rem; max-width:72ch; }
+        strong { color:var(--white); font-weight:600; }
+
+        ul { list-style:none; padding:0; }
+        ul li {
+            padding:0.6rem 0; padding-left:1.2rem; position:relative;
+            color:#b0b0b0; font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.04);
+            transition:color 0.2s, padding-left 0.2s;
+        }
+        ul li:hover { color:var(--white); padding-left:1.6rem; }
+        ul li::before {
+            content:'—'; color:var(--red); position:absolute; left:0;
+            font-size:0.7rem; top:50%; transform:translateY(-50%);
+        }
+        ul li:hover::before { content:'▶'; font-size:0.6rem; }
+
+        .skills-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1px; background: var(--grey-light);
+            border: 1px solid var(--grey-light); margin-top: 0.5rem;
+        }
+        .skill-category {
+            background: var(--grey-dark); padding: 1.5rem; position: relative;
+            transition: background 0.2s; overflow: hidden;
+        }
+        .skill-category:hover { background: var(--grey-mid); }
+        .skill-category::before {
+            content:''; position:absolute; top:0;left:0;right:0; height:2px;
+            background:var(--red); transform:scaleX(0); transform-origin:left;
+            transition:transform 0.3s;
+        }
+        .skill-category:hover::before { transform:scaleX(1); }
+        .skill-category h3 { font-size:0.7rem; margin-top:0; color:var(--red); }
+
+        .info-card {
+            border:1px solid var(--grey-light); padding:1.5rem 2rem;
+            margin-bottom:1.5rem; position:relative; background:var(--grey-dark);
+            transition:border-color 0.2s;
+        }
+        .info-card:hover { border-color:var(--red); }
+        .info-card .card-tag {
+            position:absolute; top:-0.6rem; left:1.2rem;
+            background:var(--black); padding:0 0.5rem;
+            font-family:'Space Mono',monospace; font-size:0.6rem;
+            color:var(--red); letter-spacing:0.1rem; text-transform:uppercase;
+        }
+
+        footer {
+            padding:2rem 3rem; display:flex; align-items:center;
+            justify-content:space-between; flex-wrap:wrap; gap:1rem;
+        }
+        footer p {
+            font-family:'Space Mono',monospace; font-size:0.65rem;
+            color:var(--grey-text); margin:0; max-width:none;
+        }
+        .footer-logo {
+            font-family:'Barlow Condensed',sans-serif; font-weight:900;
+            font-size:1.2rem; letter-spacing:0.2rem; text-transform:uppercase;
+        }
+        .footer-logo span { color:var(--red); }
+
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:var(--black); }
+        ::-webkit-scrollbar-thumb { background:var(--red); border-radius:0; }
+
+        @media (max-width:768px) {
+            #main-wrap { margin:0; }
+            .glyph-strip { display:none; }
+            header, section { padding:2rem 1.5rem; }
+            nav { padding:0 1rem; overflow-x:auto; }
+            nav a { padding:1rem 0.6rem; font-size:0.6rem; }
+            footer { padding:1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div id="loader">
+    <div class="loader-logo">ALVIN<span>.</span></div>
+    <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+    <div class="loader-text">Initializing profile...</div>
+</div>
+
+<div class="glyph-strip left" id="glyphLeft"></div>
+<div class="glyph-strip right" id="glyphRight"></div>
+
+<div id="main-wrap">
+
+    <header>
+        <div class="header-eyebrow">Portfolio — Cybersecurity</div>
+        <h1>
+            Alvin<br>
+            <span class="line2">Varghese George</span>
+        </h1>
+        <div class="header-meta">
+            <div class="header-meta-item">
+                <span class="dot-indicator"></span>
+                alvinvargheseg@gmail.com
+            </div>
+            <div class="header-meta-item">
+                <span class="dot-indicator"></span>
+                +91 9656191261
+            </div>
+            <div class="header-meta-item">
+                <span class="dot-indicator"></span>
+                Kottayam, Kerala, India
+            </div>
+        </div>
+        <div class="status-row">
+            <div class="status-pill active"><span class="pip"></span>Available for hire</div>
+            <div class="status-pill"><span class="pip"></span>Final Year B.Tech</div>
+            <div class="status-pill"><span class="pip"></span>CGPA 7.20</div>
+        </div>
+        <div class="corner-tl"></div>
+        <div class="corner-br"></div>
+    </header>
+
+    <nav>
+        <a href="#about">About</a>
+        <a href="#education">Education</a>
+        <a href="#skills">Skills</a>
+        <a href="#certifications">Certs</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#traits">Traits</a>
+        <a href="#interests">Interests</a>
+    </nav>
+
+    <section id="about">
+        <div class="section-label">Profile</div>
+        <h2 data-text="About Me"></h2>
+        <p>Motivated and detail-oriented final-year B.Tech Cyber Security student, passionate about safeguarding digital assets and ensuring data integrity through proactive security practices. Experienced in using security tools like Wireshark, Nmap, and Kali Linux. Eager to contribute, technically skilled with a problem-solving mindset, and would love to work in a dynamic cybersecurity team.</p>
+    </section>
+
+    <section id="education">
+        <div class="section-label">Academic Background</div>
+        <h2 data-text="Education"></h2>
+        <div class="info-card">
+            <div class="card-tag">Current</div>
+            <p><strong>Bachelor of Technology — Computer Science Engineering with Cybersecurity</strong></p>
+            <p>St Joseph's College of Engineering and Technology, Choondacherry, Pala, Kerala</p>
+            <p style="color:var(--red);font-family:'Space Mono',monospace;font-size:0.75rem;margin-top:0.5rem;">Final Year 2022–2026 &nbsp;·&nbsp; CGPA: 7.20 (up to S6)</p>
+        </div>
+    </section>
+
+    <section id="skills">
+        <div class="section-label">Technical Stack</div>
+        <h2 data-text="Skills"></h2>
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3 data-text="Programming Languages"></h3>
+                <ul>
+                    <li>C</li><li>Java</li><li>Python</li><li>Bash Script</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 data-text="Cybersecurity Tools"></h3>
+                <ul>
+                    <li>Hydra</li><li>Metasploit</li><li>John the Ripper</li>
+                    <li>Burp Suite</li><li>Wireshark</li><li>theHarvester</li>
+                    <li>OpenVAS</li><li>Whois / Nmap / ncat</li>
+                    <li>EnCase / Hex Editor</li><li>SuperScan / Steghide</li>
+                    <li>Autopsy / FTK Imager</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 data-text="Operating Systems"></h3>
+                <ul>
+                    <li>Kali Linux</li><li>Ubuntu</li><li>Windows</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3 data-text="Networking & Other"></h3>
+                <ul>
+                    <li>TCP/IP, DNS, DHCP</li><li>Firewalls & IDS</li>
+                    <li>Vulnerability Assessment</li><li>Digital Forensics</li>
+                    <li>SIEM</li><li>Incident Response</li>
+                    <li>OWASP Top 10</li><li>Penetration Testing</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="certifications">
+        <div class="section-label">Credentials</div>
+        <h2 data-text="Certifications"></h2>
+
+        <h3 data-text="NPTEL Courses (NOC)"></h3>
+        <ul>
+            <li>Practical Cyber Security for Cyber Security Practitioners</li>
+            <li>Fundamentals of Artificial Intelligence</li>
+            <li>Wheeled Mobile Robots</li>
+        </ul>
+
+        <h3 data-text="Bhodhi 2024"></h3>
+        <p>Vishwajyothi College Of Engineering and Technology — National level techfest. Improved cybersecurity awareness and knowledge.</p>
+
+        <h3 data-text="Infosys Springboard"></h3>
+        <ul>
+            <li>Software Design and Development Methodologies (2023)</li>
+            <li>Java for Beginners: Your Easy Guide to Java Programming (2023)</li>
+            <li>CEH v11: Hacking Phases &amp; Concepts (2023)</li>
+            <li>Python AI Development: Introduction (2023)</li>
+        </ul>
+
+        <h3 data-text="Forage Virtual Job Simulations — June 2025"></h3>
+        <ul>
+            <li>Tata Cybersecurity Security Analyst Job Simulation</li>
+            <li>Datacom Cybersecurity Job Simulation</li>
+            <li>Deloitte Australia Cyber Job Simulation</li>
+            <li>AIG Shields Up: Cybersecurity Virtual Experience Program</li>
+        </ul>
+
+        <h3 data-text="Google Cybersecurity Professional Certificate — August 2025"></h3>
+        <ul>
+            <li>Tools of the Trade: Linux and SQL</li>
+            <li>Automate Cybersecurity Tasks with Python</li>
+            <li>Assets, Threats, and Vulnerabilities</li>
+            <li>Foundations of Cybersecurity</li>
+            <li>Sound the Alarm: Detection and Response</li>
+            <li>Play It Safe: Manage Security Risks</li>
+            <li>Connect and Protect: Networks and Network Security</li>
+        </ul>
+    </section>
+
+    <section id="experience">
+        <div class="section-label">Work History</div>
+        <h2 data-text="Experience"></h2>
+        <div class="info-card">
+            <div class="card-tag">Internship</div>
+            <p><strong>EduAccess Internship — Wipro</strong></p>
+            <p>Completed an internship at Edu Access, Wipro, contributing to technical projects aimed at Cyber Security. This experience provided valuable insights into the intersection of technology and learning, further strengthening analytical and problem-solving skills.</p>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="section-label">Work</div>
+        <h2 data-text="Projects"></h2>
+        <div class="info-card">
+            <div class="card-tag">Academic</div>
+            <p><strong>EduAccess</strong></p>
+            <p>An app designed to enhance communication between faculty. It allows faculty members to send live updates, notifications, and important announcements directly from the head of the institution. Serving as a bridge for real-time communication between faculty and the director, improving the overall academic experience and keeping faculty informed with up-to-date information from the college.</p>
+        </div>
+    </section>
+
+    <section id="traits">
+        <div class="section-label">Character</div>
+        <h2 data-text="Personal Traits"></h2>
+        <ul>
+            <li>Multi Tasking</li><li>Time Management</li><li>Communication Skills</li>
+            <li>Teamwork</li><li>Leadership</li><li>Adaptability</li>
+            <li>Critical Thinking</li><li>Attention to Detail</li><li>Decision Making</li>
+            <li>Community Engagement</li><li>Mentoring</li>
+        </ul>
+    </section>
+
+    <section id="interests">
+        <div class="section-label">Off-Hours</div>
+        <h2 data-text="Hobbies & Interests"></h2>
+        <ul>
+            <li>Reading</li><li>Cooking</li><li>Hiking</li>
+            <li>Basketball</li><li>Badminton</li><li>Football</li>
+        </ul>
+    </section>
+
+    <footer>
+        <div class="footer-logo">ALVIN<span>.</span></div>
+        <p>© 2025 Alvin Varghese George. All rights reserved.</p>
+        <p style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--grey-text);">Cybersecurity · Kerala, India</p>
+    </footer>
+
+</div>
+
+<script>
+const yautjaCipher = {
+    'a': '⌁', 'b': '⊬', 'c': '⌐', 'd': '⊳', 'e': '⋔',
+    'f': '⊮', 'g': '⌓', 'h': '⊢', 'i': '⌇', 'j': '⊣',
+    'k': '⋉', 'l': '⊥', 'm': '⌀', 'n': '⋈', 'o': '⊙',
+    'p': '⊵', 'q': '⊗', 'r': '⊳', 's': '⌂', 't': '⊤',
+    'u': '∪', 'v': '⋁', 'w': '⋒', 'x': '⊠', 'y': '⊬',
+    'z': '⊻',
+    'A': '⌁', 'B': '⊬', 'C': '⌐', 'D': '⊳', 'E': '⋔',
+    'F': '⊮', 'G': '⌓', 'H': '⊢', 'I': '⌇', 'J': '⊣',
+    'K': '⋉', 'L': '⊥', 'M': '⌀', 'N': '⋈', 'O': '⊙',
+    'P': '⊵', 'Q': '⊗', 'R': '⊳', 'S': '⌂', 'T': '⊤',
+    'U': '∪', 'V': '⋁', 'W': '⋒', 'X': '⊠', 'Y': '⊬',
+    'Z': '⊻',
+    ' ': ' ', '&': '⊕', '-': '—', '(': '⌈', ')': '⌉',
+    '0': '⊘', '1': '⌇', '2': '⊆', '3': '⊇', '4': '⊾',
+    '5': '⊿', '6': '⋄', '7': '⌐', '8': '⊛', '9': '⊚'
+};
+
+function toYautja(text) {
+    return text.split('').map(c => yautjaCipher[c] || c).join('');
+}
+
+function initHeadings() {
+    document.querySelectorAll('h2[data-text]').forEach(el => {
+        const realText = el.getAttribute('data-text');
+        const glyphText = toYautja(realText);
+        el.innerHTML = `
+            <span class="yautja-layer" aria-hidden="true">${glyphText}</span>
+            <span class="real-layer">${realText}</span>
+        `;
+    });
+    document.querySelectorAll('h3[data-text]').forEach(el => {
+        const realText = el.getAttribute('data-text');
+        const glyphText = toYautja(realText);
+        el.innerHTML = `
+            <span class="yautja-h3-layer" aria-hidden="true">${glyphText}</span>
+            <span class="real-h3-layer">${realText}</span>
+        `;
+    });
+}
+
+function decodeHeading(el) {
+    if (el.classList.contains('decoding') || el.classList.contains('decoded')) return;
+    const isH2 = el.tagName === 'H2';
+    const realText = el.getAttribute('data-text');
+    const glyphLayer = isH2 ? el.querySelector('.yautja-layer') : el.querySelector('.yautja-h3-layer');
+    el.classList.add('decoding');
+    const chars = realText.split('');
+    let revealed = chars.map(c => ({ char: c, done: false }));
+    const totalDuration = Math.min(chars.length * 220, 4200);
+    const charDelay = totalDuration / chars.length;
+    let revealIndex = 0;
+    const interval = setInterval(() => {
+        if (revealIndex >= chars.length) {
+            clearInterval(interval);
+            setTimeout(() => {
+                el.classList.remove('decoding');
+                el.classList.add('decoded');
+            }, 300);
+            return;
+        }
+        revealed[revealIndex].done = true;
+        revealIndex++;
+        const scrambleChars = '⌁⊬⌐⊳⋔⊮⌓⊢⌇⊣⋉⊥⌀⋈⊙⊵⊗⌂⊤∪⋁⋒⊠⊻⊕⊘⊛⊚⋄⌈⌉⊾⊿';
+        const display = revealed.map((item, i) => {
+            if (item.done) return item.char;
+            return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+        }).join('');
+        if (glyphLayer) glyphLayer.textContent = display;
+    }, charDelay);
+}
+
+const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            entry.target.querySelectorAll('h2[data-text], h3[data-text]').forEach((h, idx) => {
+                setTimeout(() => decodeHeading(h), idx * 600);
+            });
+        }
+    });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('section').forEach(s => sectionObserver.observe(s));
+
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+        cursorRing.style.left = e.clientX + 'px';
+        cursorRing.style.top = e.clientY + 'px';
+    }, 60);
+});
+document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+        cursorRing.style.transform = 'translate(-50%,-50%) scale(1.5)';
+        cursorRing.style.borderColor = 'rgba(255,31,31,0.9)';
+    });
+    el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+        cursorRing.style.transform = 'translate(-50%,-50%) scale(1)';
+        cursorRing.style.borderColor = 'rgba(255,31,31,0.5)';
+    });
+});
+
+const glyphChars = '⌁⊬⌐⊳⋔⊮⌓⊢⌇⊣⋉⊥⌀⋈⊙⊵⊗⌂⊤∪⋁⋒⊠⊻⊕⊘⊛⊚⋄⌈⌉⊾⊿';
+function createGlyphs(container, count) {
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'glyph-char';
+        el.textContent = glyphChars.slice(i * 2, i * 2 + 6);
+        el.style.animationDelay = (i * 0.3) + 's';
+        el.style.animationDuration = (2 + Math.random() * 2) + 's';
+        el.style.color = i % 4 === 0 ? 'var(--yautja)' : 'var(--grey-text)';
+        container.appendChild(el);
+    }
+}
+createGlyphs(document.getElementById('glyphLeft'), 12);
+createGlyphs(document.getElementById('glyphRight'), 12);
+
+initHeadings();
+
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current ? 'var(--white)' : '';
+    });
+});
+</script>
+</body>
+</html>
